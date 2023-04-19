@@ -1,47 +1,109 @@
 import pygame
+import tkinter
+from tkinter import messagebox
+import GameValues.Values as GV
 
-def InitGraf(columnas, filas, matriz):
-    width = 800/columnas
-    height = 600/filas
+S_WIDTH = 800
+S_HEIGHT = 600
 
-    pygame.init()
+class Laberinto:
 
-    clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((800, 600))
-    screen.fill("black")
+    def __init__(self, matriz):
+        self.matriz = matriz
+        pygame.init()
+        return
+    
+    def runGame(self):
+        self.clock = pygame.time.Clock()
+        self.screen = pygame.display.set_mode((S_WIDTH, S_HEIGHT))
+        self.screen.fill("black")
+        
+        self.drawMap()
+        
+        self.clock.tick(60)
+        
+        running = True
+        dragging = False
 
-    X = Y = 0
-    n = m = 0
-    for i in range(filas):
-        while True:
-            if matriz[n][m] == 1:
-                color = (204, 188, 161)
-            else:
-                color = (46, 30, 49)
+        while(running):
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse = pygame.mouse.get_pressed()
+                    
+                    # click izquierdo
+                    if mouse[0]:
+                        # Encontrar coordenadas de la celda inicial
+                        (mouseX, mouseY) = pygame.mouse.get_pos()
+                        startX = int(mouseX/self.cellWidth)
+                        startY = int(mouseY/self.cellHeight)
+                        
+                        # Activar el arrastre
+                        dragging = True
+                        value = 0 if self.matriz[startY][startX] == 1 else 1
+                    # click de rueda
+                    elif mouse[1]:
+                        pass
+                    # click derecho
+                    elif mouse[2]:
+                        # Encontrar coordenadas de la celda correcta
+                        (mouseX, mouseY) = pygame.mouse.get_pos()
+                        x = int(mouseX/self.cellWidth)
+                        y = int(mouseY/self.cellHeight)
+                        cell = self.matriz[y][x]
+                        
+                        # Mostrar información sobre la celda
+                        tkinter.Tk().wm_withdraw() #to hide the main window
+                        messagebox.showinfo("Celda", "Pared" if cell == 0 else "Piso")
+                        pass
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if dragging:
+                        # Encontrar coordenadas de la celda final
+                        (mouseX, mouseY) = pygame.mouse.get_pos()
+                        endX = int(mouseX/self.cellWidth)
+                        endY = int(mouseY/self.cellHeight)
 
-            pygame.draw.rect(screen, color, (X, Y, width, height))
-            pygame.draw.rect(screen, (97, 42, 82), (X, Y, width, height), 1)
+                        pathX = (min(startX, endX), max(startX, endX)+1)
+                        pathY = (min(startY, endY), max(startY, endY)+1)
 
-            X += width
-            m += 1
 
-            if m >= columnas:
-                X = 0
-                m = 0
-                break
+                        # Invertir las celdas
+                        for i in range(pathY[0], pathY[1]):
+                            for j in range(pathX[0], pathX[1]):
+                                self.matriz[i][j] = value
+                        
+                        # Volver a dibujar el mapa
+                        self.drawMap()
+                        pass
+                        
+                elif event.type == pygame.QUIT:
+                    running = False
 
-        Y += height
-        n += 1
+        pygame.quit()
+        return
 
-    pygame.display.flip()
-    clock.tick(60)
+    def drawMap(self):
+        columnas = len(self.matriz[0])
+        filas = len(self.matriz)
+        terreno = [item.value for item in GV.Terreno] 
+        
+        self.cellWidth = S_WIDTH/columnas
+        self.cellHeight = S_HEIGHT/filas
+        
+        X = Y = 0
+        for i in range(filas):
+            for j in range(columnas):
+                
+                if self.matriz[i][j] in terreno:
+                    color = GV.Colores.from_terreno(GV.Terreno(self.matriz[i][j]))
+                else:
+                    print("ERROR! Celda no reconocida")
+                    color = GV.Colores.Error.value
 
-    running = True
+                pygame.draw.rect(self.screen, color, (X, Y, self.cellWidth, self.cellHeight))
+                pygame.draw.rect(self.screen, GV.Colores.Borde.value, (X, Y, self.cellWidth, self.cellHeight), 1)
 
-    while(running):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-    pygame.quit()
-    return
+                X += self.cellWidth
+            X = 0
+            Y += self.cellHeight
+        
+        pygame.display.flip()

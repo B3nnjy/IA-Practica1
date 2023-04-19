@@ -1,4 +1,4 @@
-import Grficos.GLaberinto
+from Grficos.GLaberinto import Laberinto
 
 def leer_lab():
     with open("mapa2.txt", "r") as f:
@@ -17,7 +17,6 @@ print("Matriz leida: ")
 for fila in matriz:
     print(fila)
 
-alto = len(matriz)
-ancho = len(matriz[0])
+laberinto = Laberinto(matriz)
 
-Grficos.GLaberinto.InitGraf(ancho, alto, matriz)
+laberinto.runGame()
