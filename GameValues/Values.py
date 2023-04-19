@@ -17,8 +17,8 @@ class Color(Enum):
     Borde = (97, 42, 82)
     
     @classmethod
-    def from_terreno(cls, color):
-        return cls[color.name].value
+    def from_terrain(arr, color):
+        return arr[color.name].value
     
 class Passable(Enum):
     Pared = False
@@ -27,16 +27,18 @@ class Passable(Enum):
     Fin = True
     
     @classmethod
-    def from_terreno(cls, color):
-        return cls[color.name].value
+    def from_terrain(arr, color):
+        return arr[color.name].value
 
 class Cost(Enum):
     Pared = -1
     Piso = 1
+    Inicio = 1
+    Fin = 2
     
     @classmethod
-    def from_terreno(cls, color):
-        return cls[color.name].value
+    def from_terrain(arr, color):
+        return arr[color.name].value
 
 class Direction(Enum):
     Up = 0
@@ -45,10 +47,9 @@ class Direction(Enum):
     Left = 3
     
     @classmethod
-    def turn_right(dirs, direction):
+    def turn_right(arr, direction):
         return Direction((direction.value + 1) % 4)
     
     @classmethod
-    def turn_left(dirs, direction):
+    def turn_left(arr, direction):
         return Direction((direction.value - 1) % 4)
-        

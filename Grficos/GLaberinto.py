@@ -1,16 +1,45 @@
 import pygame
 import ctypes
 from GameValues.Values import *
+from Agents.Agents import *
+from Agents.AgentSprite import AgentSprite
 
 S_WIDTH = 800
 S_HEIGHT = 600
 
 class Laberinto:
-
     def __init__(self, map):
         self.map = map
+        self.cellWidth = S_WIDTH/len(self.map[0])
+        self.cellHeight = S_HEIGHT/len(self.map)
+        self.spriteList = pygame.sprite.Group()
+        
+        start = self.findStart()
+        
+        self.agents = [
+            AgentSprite(
+                Agent2(
+                    start,
+                    Direction.Up,
+                    map
+                ),
+                self.cellWidth,
+                self.cellHeight
+            )
+        ]
+        
+        self.spriteList.add(self.agents)
+        
         pygame.init()
         return
+    
+    def findStart(self):
+        columnas = len(self.map[0])
+        filas = len(self.map)
+        for i in range(filas):
+            for j in range(columnas):
+                if self.map[i][j] == Terrain.Inicio.value:
+                    return (j, i)
     
     def runGame(self):
         self.clock = pygame.time.Clock()
@@ -25,6 +54,7 @@ class Laberinto:
         dragging = False
 
         while(running):
+            pygame.time.delay(100)
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse = pygame.mouse.get_pressed()
@@ -44,7 +74,6 @@ class Laberinto:
                     elif mouse[1]:
                         # Ciclar tipo de celda
                         self.map[y][x] = (self.map[y][x]+1) % len(Terrain)
-                        self.drawMap()
                         pass
                     # click derecho
                     elif mouse[2]:
@@ -70,11 +99,18 @@ class Laberinto:
                                 self.map[i][j] = value
                         
                         # Volver a dibujar el mapa
-                        self.drawMap()
                         dragging = False
                         pass
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LEFT:
+                        self.agents[0].agent.turn_left()
+                    elif event.key == pygame.K_RIGHT:
+                        self.agents[0].agent.turn_right()
+                    elif event.key == pygame.K_UP:
+                        self.agents[0].agent.forward()
                 elif event.type == pygame.QUIT:
                     running = False
+            self.drawMap()
 
         pygame.quit()
         return self.map
@@ -84,15 +120,11 @@ class Laberinto:
         filas = len(self.map)
         terreno = [item.value for item in Terrain] 
         
-        self.cellWidth = S_WIDTH/columnas
-        self.cellHeight = S_HEIGHT/filas
-        
         X = Y = 0
         for i in range(filas):
             for j in range(columnas):
-                
                 if self.map[i][j] in terreno:
-                    color = Color.from_terreno(Terrain(self.map[i][j]))
+                    color = Color.from_terrain(Terrain(self.map[i][j]))
                 else:
                     print("ERROR! Celda no reconocida")
                     color = Color.Error.value
@@ -104,4 +136,6 @@ class Laberinto:
             X = 0
             Y += self.cellHeight
         
+        self.spriteList.update()
+        self.spriteList.draw(self.screen)
         pygame.display.flip()
