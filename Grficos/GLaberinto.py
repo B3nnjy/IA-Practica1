@@ -1,15 +1,14 @@
 import pygame
-import tkinter
-from tkinter import messagebox
-import GameValues.Values as GV
+import ctypes
+from GameValues.Values import *
 
 S_WIDTH = 800
 S_HEIGHT = 600
 
 class Laberinto:
 
-    def __init__(self, matriz):
-        self.matriz = matriz
+    def __init__(self, map):
+        self.map = map
         pygame.init()
         return
     
@@ -29,31 +28,30 @@ class Laberinto:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse = pygame.mouse.get_pressed()
+                    (mouseX, mouseY) = pygame.mouse.get_pos()
+                    x = int(mouseX/self.cellWidth)
+                    y = int(mouseY/self.cellHeight)
                     
                     # click izquierdo
                     if mouse[0]:
-                        # Encontrar coordenadas de la celda inicial
-                        (mouseX, mouseY) = pygame.mouse.get_pos()
-                        startX = int(mouseX/self.cellWidth)
-                        startY = int(mouseY/self.cellHeight)
+                        startX = x
+                        startY = y
                         
                         # Activar el arrastre
                         dragging = True
-                        value = 0 if self.matriz[startY][startX] == 1 else 1
+                        value = 0 if self.map[startY][startX] == 1 else 1
                     # click de rueda
                     elif mouse[1]:
+                        # Ciclar tipo de celda
+                        self.map[y][x] = (self.map[y][x]+1) % len(Terrain)
+                        self.drawMap()
                         pass
                     # click derecho
                     elif mouse[2]:
-                        # Encontrar coordenadas de la celda correcta
-                        (mouseX, mouseY) = pygame.mouse.get_pos()
-                        x = int(mouseX/self.cellWidth)
-                        y = int(mouseY/self.cellHeight)
-                        cell = self.matriz[y][x]
+                        cell = self.map[y][x]
                         
                         # Mostrar información sobre la celda
-                        tkinter.Tk().wm_withdraw() #to hide the main window
-                        messagebox.showinfo("Celda", "Pared" if cell == 0 else "Piso")
+                        ctypes.windll.user32.MessageBoxW(0, Terrain(cell).name, "Celda", 0)
                         pass
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if dragging:
@@ -69,22 +67,22 @@ class Laberinto:
                         # Invertir las celdas
                         for i in range(pathY[0], pathY[1]):
                             for j in range(pathX[0], pathX[1]):
-                                self.matriz[i][j] = value
+                                self.map[i][j] = value
                         
                         # Volver a dibujar el mapa
                         self.drawMap()
+                        dragging = False
                         pass
-                        
                 elif event.type == pygame.QUIT:
                     running = False
 
         pygame.quit()
-        return
+        return self.map
 
     def drawMap(self):
-        columnas = len(self.matriz[0])
-        filas = len(self.matriz)
-        terreno = [item.value for item in GV.Terreno] 
+        columnas = len(self.map[0])
+        filas = len(self.map)
+        terreno = [item.value for item in Terrain] 
         
         self.cellWidth = S_WIDTH/columnas
         self.cellHeight = S_HEIGHT/filas
@@ -93,14 +91,14 @@ class Laberinto:
         for i in range(filas):
             for j in range(columnas):
                 
-                if self.matriz[i][j] in terreno:
-                    color = GV.Colores.from_terreno(GV.Terreno(self.matriz[i][j]))
+                if self.map[i][j] in terreno:
+                    color = Color.from_terreno(Terrain(self.map[i][j]))
                 else:
                     print("ERROR! Celda no reconocida")
-                    color = GV.Colores.Error.value
+                    color = Color.Error.value
 
                 pygame.draw.rect(self.screen, color, (X, Y, self.cellWidth, self.cellHeight))
-                pygame.draw.rect(self.screen, GV.Colores.Borde.value, (X, Y, self.cellWidth, self.cellHeight), 1)
+                pygame.draw.rect(self.screen, Color.Borde.value, (X, Y, self.cellWidth, self.cellHeight), 1)
 
                 X += self.cellWidth
             X = 0

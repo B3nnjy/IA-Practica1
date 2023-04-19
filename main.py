@@ -1,22 +1,30 @@
 from Grficos.GLaberinto import Laberinto
 
+fileName = "mapa2.txt"
+
 def leer_lab():
-    with open("mapa2.txt", "r") as f:
+    with open(fileName, "r") as f:
         lineas = f.readlines()
 
     lab = []  # lista para guardar la matriz
     for linea in lineas:
-        fila = [int(num) for num in linea.strip().split(",")]
+        fila = [int(num) for num in [*linea.strip()]]
         lab.append(fila)
     return lab
 
+def escribir_lab(lab):
+    output = ""
+    for line in lab:
+        output += "".join(str(x) for x in line)
+        output += "\n"
+    
+    output = output.strip()
+    
+    with open(fileName, "w") as f:
+        f.writelines(output)
+        
 
-matriz = leer_lab()
+laberinto = Laberinto(leer_lab())
+matriz = laberinto.runGame()
 
-print("Matriz leida: ")
-for fila in matriz:
-    print(fila)
-
-laberinto = Laberinto(matriz)
-
-laberinto.runGame()
+escribir_lab(matriz)
