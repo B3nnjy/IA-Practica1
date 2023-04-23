@@ -1,3 +1,6 @@
+import platform
+import subprocess
+
 import pygame
 import ctypes
 from GameValues.Values import *
@@ -18,16 +21,17 @@ class Laberinto:
         
         self.agents = [
             AgentSprite(
-                Agent2(
+                Agent3(
                     start,
-                    Direction.Up,
-                    map
+                    Direction.Right,
+                    map,
+                    "Sasquatch"
                 ),
                 self.cellWidth,
                 self.cellHeight
             )
         ]
-        
+
         self.spriteList.add(self.agents)
         
         pygame.init()
@@ -80,7 +84,10 @@ class Laberinto:
                         cell = self.map[y][x]
                         
                         # Mostrar información sobre la celda
-                        ctypes.windll.user32.MessageBoxW(0, Terrain(cell).name, "Celda", 0)
+                        if platform.system() == 'Windows':
+                            ctypes.windll.user32.MessageBoxW(0, Terrain(cell).name, "Celda", 0)
+                        elif platform.system() == 'Linux':
+                            subprocess.call(['notify-send', 'Celda', Terrain(cell).name])
                         pass
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if dragging:

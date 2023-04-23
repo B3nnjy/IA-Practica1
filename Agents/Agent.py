@@ -15,11 +15,11 @@ class Agent:
         if direction == Direction.Up:
             y = max(0, y-1)
         elif direction == Direction.Down:
-            y = min(len(self.map), y+1)
+            y = min(len(self.map) - 1, y+1)
         elif direction == Direction.Left:
             x = max(0, x-1)
         elif direction == Direction.Right:
-            x = min(len(self.map[0]), x+1)
+            x = min(len(self.map[0]) - 1, x+1)
         return (x, y)
         
     def senseTerrain(self, direction: Direction):
@@ -32,7 +32,8 @@ class Agent:
         
         if Passable.from_terrain(terrain):
             self.x, self.y = moveX, moveY
-            self.cost += Cost.from_terrain(terrain)
+            self.cost += Costos.from_agent(self.name).from_terrain(terrain)
+            print(self.cost)
             return True
         else:
             print(f"{self.name}: No me puedo mover a ({moveX}, {moveY})")
