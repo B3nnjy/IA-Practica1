@@ -1,4 +1,5 @@
 from Grficos.GLaberinto import Laberinto
+from Grficos.Menu.Menu import Menu
 
 fileName = "mapa2.txt"
 
@@ -17,14 +18,14 @@ def escribir_lab(lab):
     for line in lab:
         output += "".join(str(x) for x in line)
         output += "\n"
-    
+
     output = output.strip()
-    
+
     with open(fileName, "w") as f:
         f.writelines(output)
-        
 
-laberinto = Laberinto(leer_lab())
+agent = Menu().runMenu()
+laberinto = Laberinto(leer_lab(), agent)
 matriz = laberinto.runGame()
 
 escribir_lab(matriz)

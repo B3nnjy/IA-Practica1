@@ -11,7 +11,8 @@ S_WIDTH = 800
 S_HEIGHT = 600
 
 class Laberinto:
-    def __init__(self, map):
+    def __init__(self, map, nombre):
+        self.nombre  = nombre
         self.map = map
         self.cellWidth = S_WIDTH/len(self.map[0])
         self.cellHeight = S_HEIGHT/len(self.map)
@@ -25,7 +26,7 @@ class Laberinto:
                     start,
                     Direction.Right,
                     map,
-                    "Sasquatch"
+                    self.nombre
                 ),
                 self.cellWidth,
                 self.cellHeight
