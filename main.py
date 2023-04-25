@@ -1,7 +1,9 @@
 from Grficos.GLaberinto import Laberinto
 from Grficos.Menu.Menu import Menu
+from Grficos.OpcLaberinto import OpcLaberinto
 
 fileName = "mapa2.txt"
+
 
 def leer_lab():
     with open(fileName, "r") as f:
@@ -12,6 +14,7 @@ def leer_lab():
         fila = [int(num) for num in [*linea.strip()]]
         lab.append(fila)
     return lab
+
 
 def escribir_lab(lab):
     output = ""
@@ -24,8 +27,15 @@ def escribir_lab(lab):
     with open(fileName, "w") as f:
         f.writelines(output)
 
-agent = Menu().runMenu()
-laberinto = Laberinto(leer_lab(), agent)
-matriz = laberinto.runGame()
 
+agent = Menu().agent
+
+opc = OpcLaberinto(leer_lab())
+
+matriz = opc.runGame()
 escribir_lab(matriz)
+
+laberinto = Laberinto(matriz, agent)
+laberinto.runGame()
+
+

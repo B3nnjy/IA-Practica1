@@ -6,17 +6,15 @@ from GameValues.Values import HumanoImg, MonoImg, PulpoImg, SqashImg
 class Character(pygame.sprite.Sprite):
     def __init__(self, Sprite, Name, pos: tuple[int, int]) -> None:
         super().__init__()
-
         self.font = None
         self.pos = pos
         self.Sprite = Sprite
         self.Name = Name
-
         self.image = pygame.Surface((85, 100))
         self.rect = self.image.get_rect()
         self.image.fill("white")
-
         self.fontColor = (0, 0, 0)
+        pass
 
     def draw(self):
         self.font = pygame.font.Font(None, 24)

@@ -10,16 +10,18 @@ from Agents.AgentSprite import AgentSprite
 S_WIDTH = 800
 S_HEIGHT = 600
 
+
 class Laberinto:
     def __init__(self, map, nombre):
-        self.nombre  = nombre
+        self.nombre = nombre
         self.map = map
-        self.cellWidth = S_WIDTH/len(self.map[0])
-        self.cellHeight = S_HEIGHT/len(self.map)
+        self.cellWidth = S_WIDTH / len(self.map[0])
+        self.cellHeight = S_HEIGHT / len(self.map)
         self.spriteList = pygame.sprite.Group()
-        
+
         start = self.findStart()
-        
+        self.end = self.findEnd()
+
         self.agents = [
             AgentSprite(
                 Agent3(
@@ -34,10 +36,10 @@ class Laberinto:
         ]
 
         self.spriteList.add(self.agents)
-        
+
         pygame.init()
         return
-    
+
     def findStart(self):
         columnas = len(self.map[0])
         filas = len(self.map)
@@ -45,89 +47,74 @@ class Laberinto:
             for j in range(columnas):
                 if self.map[i][j] == Terrain.Inicio.value:
                     return (j, i)
-    
+
+    def findEnd(self):
+        columnas = len(self.map[0])
+        filas = len(self.map)
+        for i in range(filas):
+            for j in range(columnas):
+                if self.map[i][j] == Terrain.Fin.value:
+                    return (j, i)
+
     def runGame(self):
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((S_WIDTH, S_HEIGHT))
         self.screen.fill("black")
-        
+        pygame.display.set_caption("Laberinto game")
         self.drawMap()
-        
         self.clock.tick(60)
-        
-        running = True
-        dragging = False
 
-        while(running):
+        running = True
+        move = True
+
+        while (running):
             pygame.time.delay(100)
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouse = pygame.mouse.get_pressed()
                     (mouseX, mouseY) = pygame.mouse.get_pos()
-                    x = int(mouseX/self.cellWidth)
-                    y = int(mouseY/self.cellHeight)
-                    
-                    # click izquierdo
-                    if mouse[0]:
-                        startX = x
-                        startY = y
-                        
-                        # Activar el arrastre
-                        dragging = True
-                        value = 0 if self.map[startY][startX] == 1 else 1
-                    # click de rueda
-                    elif mouse[1]:
-                        # Ciclar tipo de celda
-                        self.map[y][x] = (self.map[y][x]+1) % len(Terrain)
-                        pass
+                    x = int(mouseX / self.cellWidth)
+                    y = int(mouseY / self.cellHeight)
+
                     # click derecho
-                    elif mouse[2]:
+                    if mouse[2]:
                         cell = self.map[y][x]
-                        
+
                         # Mostrar información sobre la celda
                         if platform.system() == 'Windows':
                             ctypes.windll.user32.MessageBoxW(0, Terrain(cell).name, "Celda", 0)
                         elif platform.system() == 'Linux':
                             subprocess.call(['notify-send', 'Celda', Terrain(cell).name])
                         pass
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if dragging:
-                        # Encontrar coordenadas de la celda final
-                        (mouseX, mouseY) = pygame.mouse.get_pos()
-                        endX = int(mouseX/self.cellWidth)
-                        endY = int(mouseY/self.cellHeight)
-
-                        pathX = (min(startX, endX), max(startX, endX)+1)
-                        pathY = (min(startY, endY), max(startY, endY)+1)
-
-
-                        # Invertir las celdas
-                        for i in range(pathY[0], pathY[1]):
-                            for j in range(pathX[0], pathX[1]):
-                                self.map[i][j] = value
-                        
-                        # Volver a dibujar el mapa
-                        dragging = False
-                        pass
                 elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        self.agents[0].agent.turn_left()
-                    elif event.key == pygame.K_RIGHT:
-                        self.agents[0].agent.turn_right()
-                    elif event.key == pygame.K_UP:
-                        self.agents[0].agent.forward()
+                    if move:
+                        if event.key == pygame.K_LEFT:
+                            self.agents[0].agent.turn_left()
+                        elif event.key == pygame.K_RIGHT:
+                            self.agents[0].agent.turn_right()
+                        elif event.key == pygame.K_UP:
+                            self.agents[0].agent.forward()
+                            pass
+                    elif event.key == pygame.K_RETURN:
+                        running = False
+                        pass
+
+                    if self.agents[0].agent.x == self.end[0] and self.agents[0].agent.y == self.end[1]:
+                        pygame.event.clear(pygame.KEYDOWN)
+                        move = False
+                        pass
                 elif event.type == pygame.QUIT:
                     running = False
-            self.drawMap()
+            self.drawMap(move)
 
         pygame.quit()
-        return self.map
+        return
 
-    def drawMap(self):
+    def drawMap(self, move=True):
         columnas = len(self.map[0])
         filas = len(self.map)
-        terreno = [item.value for item in Terrain] 
-        
+        terreno = [item.value for item in Terrain]
+
         X = Y = 0
         for i in range(filas):
             for j in range(columnas):
@@ -143,7 +130,18 @@ class Laberinto:
                 X += self.cellWidth
             X = 0
             Y += self.cellHeight
-        
+
         self.spriteList.update()
         self.spriteList.draw(self.screen)
+        if not move:
+            self.TheEnd()
+        pygame.display.flip()
+
+    def TheEnd(self):
+        font = pygame.font.Font(None, 50)
+
+        txt = font.render("Has llegado al final!!", True, (100, 100, 100))
+        txtC = font.render(f"Costo: {self.agents[0].agent.cost}", True, (100,100,100))
+        self.screen.blit(txt, (200, 200))
+        self.screen.blit(txtC, (300, 240))
         pygame.display.flip()

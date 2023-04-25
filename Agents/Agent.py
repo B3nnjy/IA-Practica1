@@ -33,7 +33,6 @@ class Agent:
         if Passable.from_terrain(terrain):
             self.x, self.y = moveX, moveY
             self.cost += Costos.from_agent(self.name).from_terrain(terrain)
-            print(self.cost)
             return True
         else:
             print(f"{self.name}: No me puedo mover a ({moveX}, {moveY})")

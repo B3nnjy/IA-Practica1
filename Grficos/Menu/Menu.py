@@ -4,7 +4,7 @@ from Grficos.Menu.MenuSprites import CharacterP, CharacterH, CharacterM, Charact
 
 
 class Menu():
-    def runMenu(self):
+    def __init__(self):
         self.spriteList = pygame.sprite.Group()
         self.sprites = [CharacterH(), CharacterM(), CharacterP(), CharacterS()]
         self.spriteList.add(self.sprites)
@@ -16,6 +16,7 @@ class Menu():
         self.clock = pygame.time.Clock()
         self.screen = pygame.display.set_mode((400, 150))
         self.screen.fill("white")
+        pygame.display.set_caption("Menu")
         self.title = self.font.render("Choose a character", False, (0, 0, 0))
 
         self.clock.tick(60)
@@ -39,11 +40,10 @@ class Menu():
                         self.agent = "Sasquatch"
                         running = False
                 elif event.type == pygame.QUIT:
-                    running = False
+                    exit(0)
 
             self.spriteList.update()
             self.spriteList.draw(self.screen)
             self.screen.blit(self.title, (100, 130))
             pygame.display.flip()
         pygame.quit()
-        return self.agent
