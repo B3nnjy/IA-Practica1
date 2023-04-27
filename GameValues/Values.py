@@ -16,8 +16,8 @@ class Terrain(Enum):
 class Color(Enum):
     Pared = (46, 30, 49)
     Piso = (204, 188, 161)
-    Inicio = (139, 215, 232)
-    Fin = (87, 209, 63)
+    Inicio = (0, 255, 0)
+    Fin = (0, 0, 255)
     Mount = (0, 0, 0)
     Tierra = (184, 156, 44)
     Agua = (75, 209, 209)
